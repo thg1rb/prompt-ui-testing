@@ -9,6 +9,7 @@ import sys
 
 
 ALLOWED_EMAIL_DOMAIN = "users.noreply.github.com"
+ALLOWED_GITHUB_WEB_EMAIL = "noreply@github.com"
 IDENTITY_RE = re.compile(rb"^(author|committer|tagger) .* <([^>]+)>")
 
 
@@ -21,8 +22,10 @@ def permitted(email: bytes) -> bool:
         value = email.decode("ascii").lower()
     except UnicodeDecodeError:
         return False
-    return value.count("@") == 1 and bool(value.partition("@")[0]) and value.endswith(
-        "@" + ALLOWED_EMAIL_DOMAIN
+    return value == ALLOWED_GITHUB_WEB_EMAIL or (
+        value.count("@") == 1
+        and bool(value.partition("@")[0])
+        and value.endswith("@" + ALLOWED_EMAIL_DOMAIN)
     )
 
 
