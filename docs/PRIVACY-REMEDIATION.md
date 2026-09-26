@@ -44,7 +44,7 @@ The authorized narrow remote operations completed:
 3. Only `main` and `develop` were force-updated with leases against the recorded old objects. Both updates were immediately verified; the branches now point to sanitized targets.
 4. A fresh public clone contained both sanitized branches and no tags. The privacy guard and file-content scans passed.
 
-The public repository showed no visible forks or pull requests when checked. Old commit API lookups returned no commit and direct pages returned 404. External clones, forks created later, or unobserved caches cannot be enumerated or rewritten by the repository owner. Anyone with a pre-remediation clone under maintainer control should re-clone from the sanitized repository; never merge or push a pre-remediation branch.
+The public repository showed no visible forks or pull requests when checked. Old commit API lookups returned no commit and direct pages returned 404. During final publication review, the active GitHub release list contained only `v0.1.1`, and the GitHub Release API returned 404 for `v0.1.0`; a web-cached fetch of the former `v0.1.0` release URL still returned its historical page content. This is consistent with a stale cached view and does not establish that the deleted release is active again. External clones, forks created later, or unobserved caches cannot be enumerated or rewritten by the repository owner. Anyone with a pre-remediation clone under maintainer control should re-clone from the sanitized repository; never merge or push a pre-remediation branch.
 
 ## Backup, Rollback, and GitHub Support
 
