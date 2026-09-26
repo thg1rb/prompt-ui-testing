@@ -236,3 +236,30 @@ The whitespace-only exploratory submission was not treated as a product defect: 
 - **Installation smoke:** Existing Project, User/Global, and Plugin runtime records remain applicable. The README's Unix copy and Pillow setup path was exercised in a clean temporary project; no Plugin or manifest command changed. Windows commands were added as unvalidated platform guidance, not as a runtime support claim.
 
 No implementation defect was found. Deferred variants and untested platform runtimes are documented limitations, not blockers for this candidate.
+
+## Chrome isolated headed browser defaults — 2026-09-26
+
+### Environment and configuration
+
+- Codex CLI `0.156.1` on macOS; Playwright MCP `0.0.82`; Node.js `v24.13.1`; Google Chrome `154`.
+- Used `--browser=chrome --isolated`, `launchOptions.headless=false`, `launchOptions.args=["--start-maximized"]`, and `contextOptions.viewport=null`. No `--headless`, Chrome `--incognito`, or OS fullscreen option was used. The MCP configuration was a process-only override; persistent user MCP settings were not changed.
+- A disposable fixture was served only on `127.0.0.1`. It stores a synthetic sign-in marker in a cookie, local storage, and session storage; no real credentials or accounts were used.
+- The configured browser reported `navigator.userAgentData.brands` containing `Google Chrome 154`. Headed mode was set explicitly. Reported outer window size `1800×1130` matched the available desktop area `1800×1130`; this validates maximization in this macOS environment only.
+- Every successful evidence image was composed from a raw Playwright screenshot and the browser-observed `http://127.0.0.1:43992/` URL. The URL strip and page content were visually checked. Images and fixture files remain under a disposable `/tmp` workspace and are not committed.
+
+### Scenarios
+
+| Scenario | Expected | Actual | Result |
+| --- | --- | --- | --- |
+| Chrome selection and headed/maximized localhost run | Launch branded Google Chrome visibly, use the available work area, interact with the page, and produce URL-visible evidence | Google Chrome 154 reported; `headless=false`; outer dimensions matched available desktop dimensions; heading and synthetic signed-in state matched; composed screenshot displayed the current localhost URL | PASS |
+| Fresh isolated process | State set in Session A is absent in a new isolated Session B | The new process displayed “No sign-in state found”; local storage, session storage, and cookies were empty | PASS |
+| Browser close then new case in the same MCP connection | Closing Case A's browser session clears state before Case B | After `browser_close`, a new navigation in the same Codex/Playwright MCP connection showed no sign-in marker, empty storage, and no cookies | PASS |
+| Screenshot integrity after maximize | Final evidence still visibly shows the actual current URL without losing page pixels | URL strip matched the Playwright-observed URL; composed image preserved the captured page below the strip | PASS |
+
+### Findings and limitations
+
+- The README previously recommended `--headless`, contrary to the requested visible default. Setup guidance now selects Chrome and isolated mode, with headed operation and a tested maximized-window config.
+- Native Chrome Incognito was intentionally avoided; Playwright MCP isolated mode met the state-isolation requirement. Native Incognito UI and OS fullscreen were not used or claimed.
+- Computer Use is not a normal dependency or automatic fallback. It may be considered only for a required interaction Playwright MCP cannot perform and only when browser/session and evidence constraints remain satisfiable.
+- Chrome identity, headed launch, and maximization were validated on this macOS environment only. Other operating systems and display managers remain untested. If Chrome is unavailable, report the limitation and do not silently switch browsers when identity matters.
+- Authentication was validated with a synthetic local marker, not a real account. Authentication-dependent tests should log in within the isolated case or use explicitly requested storage state; persistent profile reuse remains an explicit, reportable exception.

@@ -65,13 +65,36 @@ Codex detects newly installed skills automatically; start a new session if the S
 Playwright MCP is a separate dependency; installing this Skill does not install or configure it. It requires Node.js 20 or newer. For Codex CLI, add the server using the current [Codex MCP command format](https://learn.chatgpt.com/docs/extend/mcp) and [Playwright MCP package](https://playwright.dev/mcp/installation):
 
 ```sh
-codex mcp add playwright -- npx --yes @playwright/mcp@latest --headless
+codex mcp add playwright -- npx --yes @playwright/mcp@latest --browser=chrome --isolated --config /absolute/path/to/playwright-mcp-config.json
 codex mcp list
 ```
 
-Playwright's install guide says the browser downloads automatically on first use. If a server reports that the selected browser is missing, install that browser with the command in its error (for example, `npx --yes @playwright/mcp@latest install-browser firefox`); this was required for Firefox in validation. The default `chrome` channel used an existing Google Chrome installation on this machine. Start a fresh Codex process after adding the server; an already-running session may retain its previous tool list. In the ChatGPT desktop app, MCP configuration is shared with Codex CLI; add the server under **Settings → MCP servers** and select **Restart**. The host may request approval before browser tool calls. Do not globally approve an MCP server unless you trust it. In non-interactive runs that cannot answer approval prompts, configure the server's `default_tools_approval_mode` for that run; this validation used `approve` only for its disposable Playwright session because its CLI approval policy was `never`. See the [Codex MCP settings](https://learn.chatgpt.com/docs/extend/mcp#configure-with-configtoml) for supported approval values.
+This selects Google Chrome and an in-memory isolated profile; headed mode is Playwright MCP's default, so no `--headless` flag is needed. Each independent test should close its browser session before the next starts. For best-effort maximization, Playwright MCP supports a JSON config file with `browser.launchOptions.args: ["--start-maximized"]` and `browser.contextOptions.viewport: null`; see [Playwright MCP options](https://playwright.dev/mcp/configuration/options). [Playwright warns](https://playwright.dev/docs/api/class-browsertype#browser-type-launch) that custom browser arguments can affect automation, so validate this on the host. Do not add `--incognito` or describe Chrome's native Incognito UI as active: isolated Playwright state is the default privacy behavior. Headless mode is optional when explicitly requested.
 
-The browser capability must support navigation, semantic inspection, requested controls, active URL retrieval, and screenshots. If Playwright MCP is absent, unavailable, or denied, the Skill must report `BLOCKED` (or another accurate execution limitation) without claiming browser execution or evidence. If a requested control or URL-visible evidence cannot be produced, explain the limitation.
+The following config was verified with Playwright MCP `0.0.82` and Google Chrome on macOS:
+
+```json
+{
+  "browser": {
+    "browserName": "chromium",
+    "isolated": true,
+    "launchOptions": {
+      "channel": "chrome",
+      "headless": false,
+      "args": ["--start-maximized"]
+    },
+    "contextOptions": {
+      "viewport": null
+    }
+  }
+}
+```
+
+Save the JSON as a local file outside a public repository at the absolute path used in the command above. If a `playwright` server is already configured, update its command arguments to use this config rather than leaving the previous setup in place. The tested window's outer size matched the available desktop area. Other operating systems and display environments are not validated; if maximization does not work, keep testing in the visible headed window and report that setup limitation.
+
+Playwright's install guide says the browser downloads automatically on first use. If Google Chrome is unavailable, report that limitation and use another browser only if the user allows it or the documented fallback applies. Do not silently change browser identity when it matters to the test. Start a fresh Codex process after adding the server; an already-running session may retain its previous tool list. In the ChatGPT desktop app, MCP configuration is shared with Codex CLI; add the server under **Settings → MCP servers** and select **Restart**. The host may request approval before browser tool calls. Do not globally approve an MCP server unless you trust it. In non-interactive runs that cannot answer approval prompts, configure the server's `default_tools_approval_mode` for that run; this validation used `approve` only for its disposable Playwright session because its CLI approval policy was `never`. See the [Codex MCP settings](https://learn.chatgpt.com/docs/extend/mcp#configure-with-configtoml) for supported approval values.
+
+The browser capability must support navigation, semantic inspection, requested controls, active URL retrieval, and screenshots. If Playwright MCP is absent, unavailable, or denied, the Skill must report `BLOCKED` (or another accurate execution limitation) without claiming browser execution or evidence. Do not automatically switch to Computer Use. Consider it only when Playwright MCP genuinely cannot perform a required interaction, the alternate path can preserve the requested session and evidence requirements, and the host provides it. If a requested control or URL-visible evidence cannot be produced, explain the limitation.
 
 For a local app, run its server before testing. A remote or containerized browser may not share your machine's `localhost`; use a browser on the same machine or an explicitly provided reachable endpoint. A browser-to-localhost network limitation is `BLOCKED`, not an application failure.
 
