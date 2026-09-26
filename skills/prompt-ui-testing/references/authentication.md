@@ -1,6 +1,6 @@
 # Authentication
 
-Use an existing authorized browser session when supplied. Other supported routes include an explicitly provided username/password through a secure environment, browser profile or cookie/session reuse where authorized, and manual handoff for SSO or MFA/OTP. Never place credentials, tokens, cookies, or OTP secrets in the public Skill, examples, reports, or repository.
+Start each independent test in a fresh isolated browser session by default. Do not inherit cookies or local/session storage from an earlier case. When authentication is required, log in as part of that case using credentials supplied through a secure environment, or use explicitly supplied storage state when the user requests and the browser capability supports it. Reuse of a persistent profile or authenticated session is an explicit deviation from the default and must be disclosed. Never place credentials, tokens, cookies, storage state, or OTP secrets in the public Skill, examples, reports, or repository.
 
 Ask the user for a secure handoff when authentication is required and unavailable. Report `BLOCKED` if the handoff cannot be completed. Do not bypass authentication or use credentials from unrelated contexts.
 
