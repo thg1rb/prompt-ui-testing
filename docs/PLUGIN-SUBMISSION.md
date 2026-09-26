@@ -31,11 +31,11 @@ The archive root must contain `plugin.json`, `assets/`, and `skills/`; do not in
 | Privacy policy | <https://github.com/thg1rb/prompt-ui-testing/blob/main/PRIVACY.md> (available after the policy is merged to `main`) |
 | Terms | Omit; optional for a skills-only ZIP under current submission error guidance. Do not substitute the software license for product terms. |
 | Logo / composer icon | `assets/prompt-ui-testing-logo.svg`, `assets/prompt-ui-testing-icon.svg` |
-| Developer identity | Publisher selects the verified identity in the portal. No account identity or verification details are stored in this repository. |
+| Root `author.name` / listing `developerName` | Not set in the repository because the verified publisher name is account data and must not be guessed. Current OpenAI submission guidance says the portal can populate both from the selected verified identity after confirmation. Select the intended identity and confirm the normalized manifest before submission. |
 | Availability | Publisher selects countries/regions after confirming support and legal readiness. |
 | Release notes | Initial skills-only listing of the released `v0.1.1` Skill. Browser tooling is external and is not included. |
 
-The current [submission error reference](https://developers.openai.com/plugins/deploy/submission-errors) limits final display name and short description to 30 characters, permits up to three starter prompts, lists supported categories, and requires square logo and composer icon assets for directory submissions. The manifest contains three prompts. The portal supplies the verified developer identity and availability selection.
+The current [submission error reference](https://developers.openai.com/plugins/deploy/submission-errors) limits final display name and short description to 30 characters, permits up to three starter prompts, lists supported categories, and requires square logo and composer icon assets for directory submissions. It requires both `author.name` and `interface.developerName`; when these are absent or differ, the portal can default both to the selected verified identity after confirmation. This repository intentionally leaves those account-specific values unset. Therefore, the package is prepared, but submission is blocked until the publisher selects the verified identity and confirms the portal-normalized manifest. The publisher also selects availability in the portal.
 
 Runtime validation currently covers Codex CLI on macOS, including local Plugin installation. ChatGPT desktop Plugin runtime and other operating systems have not been runtime-validated; describe these as untested rather than validated. OpenAI's public Plugin directory is shared across supported surfaces, but surface availability may differ; verify the portal's current availability choices and reviewer requirements before submission.
 
@@ -47,7 +47,7 @@ Runtime validation currently covers Codex CLI on macOS, including local Plugin i
 
 ## Submission test cases
 
-The portal currently requests five positive and three negative cases. Each case below is written for a reviewer without private credentials or internal context. The local fixture is static and disposable; start it from the repository root with `python3 -m http.server 4173 --directory examples/plugin-fixture`, then open `http://localhost:4173`. Its file chooser only demonstrates local selection and a client-side confirmation; it does not upload the file to a server.
+The portal currently requests five positive and three negative cases. Each case below is written for a reviewer without private credentials or internal context. The local fixture is static and disposable; start it from the repository root with `python3 -m http.server 4173 --bind 127.0.0.1 --directory examples/plugin-fixture`, then open `http://127.0.0.1:4173`. Binding to loopback keeps the fixture local to the machine. Its file chooser only demonstrates local selection and a client-side confirmation; it does not upload the file to a server.
 
 For execution cases, the reviewer also needs a compatible browser capability. The README's [browser setup instructions](../README.md#connect-a-browser) give the Playwright MCP setup, Node.js prerequisite, browser install guidance, host approval behavior, and fresh-session requirement. Planning and negative missing-browser cases do not require Playwright MCP.
 
@@ -89,12 +89,12 @@ This preparation references the current official [submission flow](https://devel
 | Check | Expected | Actual | Result |
 | --- | --- | --- | --- |
 | Current package schema | Root manifest conforms to Agent Plugins 1.0.0. | Validated against the live official JSON Schema. | PASS |
-| Package metadata/assets | Version and listing limits are valid; referenced assets exist and are square SVGs. | Version `0.1.1`; three prompts are within length limits; both referenced SVG assets exist and are square. | PASS |
+| Package metadata/assets | Version and listing limits are valid; referenced assets exist and are square SVGs. | Version `0.1.1`; three prompts are within length limits; both referenced SVG assets exist and are square. Verified publisher identity fields are intentionally unset pending portal normalization and confirmation. | PASS WITH EXTERNAL SUBMISSION GATE |
 | Skills-only archive | Root manifest, assets, and complete Skill are present; development files and caches are absent. | Rebuilt ZIP contains 19 package entries and no docs, tests, local marketplace, Git data, bytecode, or cache paths. | PASS |
 | Clean Codex Plugin install | Package is installable and enables the Plugin without relying on the development repository. | Codex CLI `0.156.1` installed the clean staged package into a disposable `CODEX_HOME`; the Plugin appears enabled at version `0.1.1`, and the installed Skill references and assets are present. | PASS |
 | Skill activation/runtime | Submission prompts activate correctly and unrelated prompts do not. | The prior Codex CLI Plugin end-to-end activation and non-activation results are recorded in [VALIDATION.md](VALIDATION.md). The Skill itself is unchanged in this preparation. | REUSED EVIDENCE |
 | Browser smoke in this session | Run a browser test and verify URL-visible evidence when a compatible browser is available. | Playwright MCP is not configured. No browser smoke or screenshot was claimed. | BLOCKED BY MISSING BROWSER TOOL |
 | Privacy URL | Public policy is reachable at the manifest URL. | The URL targets `main` and becomes available only after this branch is promoted. | PENDING PROMOTION |
-| OpenAI portal | Draft status and portal warnings are recorded. | No portal draft was created and nothing was submitted. Publisher must choose availability regions and verify the final listing/identity before submission. | NOT SUBMITTED |
+| OpenAI portal | Draft status and portal warnings are recorded. | No portal draft was created and nothing was submitted. Publisher must select a verified identity, confirm the normalized author/listing fields, choose availability regions, and review the final listing before submission. | NOT SUBMITTED |
 
 An initial archive contained ignored Python bytecode because the original `zip` command did not exclude caches. The command was corrected and the archive was rebuilt and inspected; the retest passed. The local fixture is provided for reviewer use, but was not browser-executed in this session because no compatible browser automation tool was available.

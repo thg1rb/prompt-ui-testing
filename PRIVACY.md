@@ -6,7 +6,7 @@ This project provides Agent Skill instructions and a small evidence helper. It d
 
 A user may ask an Agent to visit a target URL, enter test values, inspect page content, or choose a local file. These may include personal data if the user supplies it or the page displays it. The purposes are to perform the requested UI test, compare observed results with expectations, and create requested evidence. The Agent host and any configured browser capability, including a separately configured Playwright MCP provider, may process prompts, URLs, page text, screenshots, and test values. They are the recipients needed to perform the task; their additional recipients, collection, and retention are governed by those providers' own policies. This project does not control or verify those practices.
 
-The Skill's evidence workflow can create a raw screenshot and a composed screenshot in the evidence directory selected for the test. The files remain in that local execution environment until the user deletes them; the helper does not impose a retention period or upload evidence. The user controls the evidence location, access, and deletion. The project maintainers do not receive copies by default.
+The Skill's evidence workflow can create a raw screenshot and a composed screenshot in the evidence directory selected for the test. The helper does not impose a retention period or upload evidence. How long files remain available depends on the Agent host and workspace; this project does not control automatic cleanup or persistence. Where the host permits it, the user can choose the evidence location, control access, and delete files. The project maintainers do not receive copies by default.
 
 ## URL and screenshot handling
 
