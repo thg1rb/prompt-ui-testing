@@ -1,8 +1,36 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "prompt-ui-testing",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Prompt-driven black-box testing of web user interfaces with URL-visible evidence.",
   "license": "MIT",
-  "keywords": ["agent-skill", "ui-testing", "browser-testing", "playwright-mcp"]
+  "keywords": ["agent-skill", "ui-testing", "browser-testing", "playwright-mcp"],
+  "homepage": "https://github.com/thg1rb/prompt-ui-testing",
+  "repository": "https://github.com/thg1rb/prompt-ui-testing",
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Prompt UI Testing",
+        "shortDescription": "Black-box web UI testing",
+        "longDescription": "Guide an agent through authorized, black-box web UI testing. Plan and run browser checks against remote or localhost applications, compare expected and observed results, and report PASS, FAIL, BLOCKED, or INCONCLUSIVE with URL-visible screenshot evidence. A compatible browser capability must be available in the host. Playwright MCP is a separately configured option and is not bundled; without a usable browser, the Skill reports BLOCKED.",
+        "category": "Developer Tools",
+        "capabilities": [
+          "Test web interfaces using natural-language instructions",
+          "Validate forms and file selection workflows",
+          "Compare expected and observed UI results",
+          "Create screenshots with a redacted current URL"
+        ],
+        "websiteURL": "https://github.com/thg1rb/prompt-ui-testing",
+        "supportURL": "https://github.com/thg1rb/prompt-ui-testing/issues",
+        "privacyPolicyURL": "https://github.com/thg1rb/prompt-ui-testing/blob/main/PRIVACY.md",
+        "defaultPrompt": [
+          "Test https://example.com and verify that the page heading is Example Domain.",
+          "At http://localhost:4173, test the sample form and select sample-upload.txt.",
+          "Plan a test for http://localhost:4173; do not open the page or execute any steps."
+        ],
+        "logo": "./assets/prompt-ui-testing-logo.svg",
+        "composerIcon": "./assets/prompt-ui-testing-icon.svg"
+      }
+    }
+  }
 }

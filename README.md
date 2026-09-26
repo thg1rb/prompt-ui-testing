@@ -6,6 +6,8 @@
 
 The target application needs no code changes, test files, selectors, or automation scripts. The Skill supplies policy and workflow; a separate browser capability performs the actions. [Playwright MCP](https://playwright.dev/mcp/installation) is preferred.
 
+For the Plugin listing, see [privacy details](PRIVACY.md), [security guidance](SECURITY.md), and the [submission preparation record](docs/PLUGIN-SUBMISSION.md). The public package is skills-only; browser automation is provided separately by the host.
+
 ## How it works
 
 ```text
@@ -145,4 +147,4 @@ Start a fresh Codex session after installing the plugin. For local marketplace c
 
 The unverified variants are tracked in the [requirement traceability matrix](docs/REQUIREMENT-TRACEABILITY.md). They are limitations of the v0.1.0 validation scope, not claims of runtime support.
 
-See [SECURITY.md](SECURITY.md) for handling sensitive targets and [CONTRIBUTING.md](CONTRIBUTING.md) for validation and public-safe examples.
+See [SECURITY.md](SECURITY.md) for handling sensitive targets and [CONTRIBUTING.md](CONTRIBUTING.md) for the task-branch → PR → review → develop workflow, validation guidance, and public-safe examples.

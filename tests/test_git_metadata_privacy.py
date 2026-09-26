@@ -9,6 +9,7 @@ from pathlib import Path
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "check_git_metadata_privacy.py"
 SAFE_EMAIL = "12345+sample-user@users.noreply.github.com"
+GITHUB_WEB_EMAIL = "noreply@github.com"
 PRIVATE_EMAIL = "private.person@example.net"
 
 
@@ -55,6 +56,22 @@ class GitMetadataPrivacyTests(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("PASS:", result.stdout)
+
+    def test_accepts_github_web_merge_committer_identity(self) -> None:
+        self.make_commit(committer_email=GITHUB_WEB_EMAIL)
+
+        result = self.run_check()
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("PASS:", result.stdout)
+
+    def test_rejects_other_github_com_identity(self) -> None:
+        self.make_commit(committer_email="other@github.com")
+
+        result = self.run_check()
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("committer email is not allowlisted", result.stdout)
 
     def test_rejects_author_and_committer_email_without_printing_address(self) -> None:
         self.make_commit(PRIVATE_EMAIL, PRIVATE_EMAIL)

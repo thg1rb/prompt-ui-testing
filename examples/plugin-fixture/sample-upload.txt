@@ -1,0 +1,1 @@
+Disposable public-safe fixture file for the local browser test.
