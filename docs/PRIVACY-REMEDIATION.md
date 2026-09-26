@@ -1,6 +1,6 @@
 # Git Metadata Privacy Remediation
 
-**Status: remote history remediation complete; `v0.1.1` recovery release in progress.** This record omits the exposed email and old commit hashes.
+**Status: REMEDIATION COMPLETE — `v0.1.1` released and fresh installation validated.** This record omits the exposed email and old commit hashes.
 
 ## Exposure and Impact
 
@@ -54,4 +54,6 @@ GitHub's current [sensitive-data removal guidance](https://docs.github.com/en/au
 
 ## Recovery Release
 
-`v0.1.0` is withdrawn. `v0.1.1` is being prepared as the first acceptable public release with the same initial Skill functionality and sanitized Git metadata. The release commit, tag, GitHub Release, fresh installation, and post-release validation will be recorded here after completion. Plugin publication remains paused until the replacement release passes fresh-install validation; Plugin publication is outside this task.
+`v0.1.0` is withdrawn. `v0.1.1` is the first acceptable public release with the same initial Skill functionality and sanitized Git metadata. The tag points to recovery commit `49a1f2d03752d143c5fd1b17f335cac40d4b0945`; its annotated tagger passed the metadata guard. The public GitHub Release is [v0.1.1 — Initial Public Release](https://github.com/thg1rb/prompt-ui-testing/releases/tag/v0.1.1).
+
+The fresh installation from the published tag passed Skill validation, evidence-helper startup, and a plan-only Codex CLI discovery session. The post-release browser smoke was **BLOCKED** because no compatible browser tool was available. No navigation, screenshot, or browser evidence was claimed; previously completed browser integration validation was reused because browser behavior did not change. Plugin publication was not performed and may resume only in a separate phase.
