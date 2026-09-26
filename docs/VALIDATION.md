@@ -263,3 +263,34 @@ No implementation defect was found. Deferred variants and untested platform runt
 - Computer Use is not a normal dependency or automatic fallback. It may be considered only for a required interaction Playwright MCP cannot perform and only when browser/session and evidence constraints remain satisfiable.
 - Chrome identity, headed launch, and maximization were validated on this macOS environment only. Other operating systems and display managers remain untested. If Chrome is unavailable, report the limitation and do not silently switch browsers when identity matters.
 - Authentication was validated with a synthetic local marker, not a real account. Authentication-dependent tests should log in within the isolated case or use explicitly requested storage state; persistent profile reuse remains an explicit, reportable exception.
+
+## v0.1.2 release-candidate validation — 2026-09-26
+
+### Environment and configuration
+
+- Codex CLI `0.156.1`, Playwright MCP `0.0.82`, Node.js `v24.13.1`, Google Chrome `154`, macOS.
+- Used a process-only MCP configuration with `--browser=chrome --isolated`, `launchOptions.headless=false`, `--start-maximized`, and `contextOptions.viewport=null`. No persistent MCP settings were changed.
+- Local tests used a disposable fixture served only on `127.0.0.1:43661`; remote navigation used `https://example.com`. Browser state was synthetic, with no real credentials or account.
+- On the local run, Playwright reported a `1920×1050` outer window on a `1920×1080` screen and a `1920×963` viewport. This is consistent with a maximized headed window in this macOS environment; other platforms remain untested.
+
+### Release-candidate scenarios
+
+| Scenario | Expected | Actual | Result |
+| --- | --- | --- | --- |
+| Local multi-step case and SPA URL | In one case session, set synthetic state, complete the flow, and observe `/complete` | The state appeared in cookie, local storage, and session storage; “Sample flow complete” appeared and the browser URL became `http://127.0.0.1:43661/complete` | PASS |
+| Independent case isolation | After closing Case A, Case B has no prior case state | Case B opened with empty cookie, local storage, and session storage; “Sample Checkout” remained visible | PASS |
+| Explicit state reuse exception | When explicitly requested, supplied state can be loaded and the deviation from the fresh-session default is reported | Synthetic storage state was explicitly restored; the page reported state present. The report called out the deviation and did not claim real-account or persistent-profile reuse | PASS |
+| Local URL-visible evidence | Final screenshot shows the browser-observed current URL and preserves page content | Composed image showed `http://127.0.0.1:43661/complete` above the captured completion page; raw screenshot was retained | PASS |
+| Remote navigation | `https://example.com` shows “Example Domain” and evidence uses the active URL | Heading and title matched; final image visibly showed `https://example.com/` and the page | PASS |
+| Remote URL-visible evidence | Capture the actual active URL, not just the requested URL | Browser evaluation reported `https://example.com/`; composed evidence displayed that URL | PASS |
+| Result classification regression | Correct PASS behavior and no change to established FAIL/BLOCKED behavior | Current local and remote cases returned PASS. Existing expected application-error (`FAIL`) and unavailable prerequisite (`BLOCKED`) integration scenarios remain valid and were reused; classification code was unchanged | PASS |
+| URL redaction and composition regression | Redact sensitive URL metadata without changing raw pixels | All evidence-helper tests passed, covering URL redaction and raw-pixel preservation; prior redirect/SPA/redaction integration evidence remains applicable | PASS |
+
+Successful raw and composed screenshots were visually inspected from the disposable workspace and are not committed. A first attempt to compose local evidence ran in a read-only nested sandbox and was interrupted after helper write permission was denied; the final successful runs used explicit workspace-write permissions. This was a test-run setup issue, not a Skill or helper defect.
+
+### Scope and limitations
+
+- The dedicated feature validation and release-candidate checks both used macOS, Playwright MCP `0.0.82`, and Google Chrome `154`; no claim is made for other platforms.
+- Native Chrome Incognito UI and true OS fullscreen were not used or claimed. Maximization is best-effort.
+- Real SSO/MFA and persistent authenticated profile reuse remain untested. Only explicit synthetic storage-state restoration was exercised.
+- An existing validated expected-error scenario produced the expected `FAIL`; the unavailable-prerequisite scenario produced `BLOCKED`. These were reused rather than manufacturing a failure in the release-candidate fixture.

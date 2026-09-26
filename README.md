@@ -2,7 +2,7 @@
 
 `prompt-ui-testing` is a reusable Agent Skill for prompt-driven, black-box testing of web applications. Give the agent a URL, actions, and an expected UI result. The Skill guides browser interaction, evidence capture, and an honest `PASS`, `FAIL`, `BLOCKED`, or `INCONCLUSIVE` report. It supports remote sites and applications running at `localhost` or `127.0.0.1`.
 
-**Current release:** [`v0.1.1`](https://github.com/thg1rb/prompt-ui-testing/releases/tag/v0.1.1) supersedes withdrawn `v0.1.0`, which did not meet the repository's Git metadata privacy requirements. See the [changelog](CHANGELOG.md), [release record](docs/releases/v0.1.1.md), and [remediation record](docs/PRIVACY-REMEDIATION.md).
+**Current release:** [`v0.1.2`](https://github.com/thg1rb/prompt-ui-testing/releases/tag/v0.1.2). See the [changelog](CHANGELOG.md) and [release record](docs/releases/v0.1.2.md). The earlier `v0.1.0` release was withdrawn and superseded by `v0.1.1` after Git metadata privacy remediation; see the [remediation record](docs/PRIVACY-REMEDIATION.md).
 
 The target application needs no code changes, test files, selectors, or automation scripts. The Skill supplies policy and workflow; a separate browser capability performs the actions. [Playwright MCP](https://playwright.dev/mcp/installation) is preferred.
 
@@ -164,10 +164,11 @@ Start a fresh Codex session after installing the plugin. For local marketplace c
 
 - **Control coverage:** Common text, password, select, checkbox, radio, date/time, file-input, dialog, and pagination interactions were exercised. Custom combobox/autocomplete, tab switching, number/textarea, and drag-and-drop upload variants were not individually validated; use semantic controls the browser exposes, otherwise report the limitation.
 - **Authentication and recovery:** Disposable login and unavailable-SSO handling were validated. Real SSO/MFA handoff and authorized profile reuse were not; hot reload, minor UI drift recovery, and measured retry bounds were not directly tested. Stop at unavailable authentication and report `BLOCKED` rather than bypassing it.
+- **Browser session and window modes:** Independent cases use fresh isolated state by default. Reusing explicitly supplied storage state is supported and must be disclosed; real authenticated profile reuse is not runtime validated. Native Chrome Incognito UI is not required, true OS fullscreen is not guaranteed, and maximization is best-effort. Chrome 154 headed/isolation/maximization behavior was runtime validated on macOS only.
 - **Dynamic UI and wording:** SPA navigation, redirects, delayed content, and modal behavior were exercised. Lazy loading, toast-specific behavior, and hot-reload recovery were not; ambiguous equivalent labels were not separately tested. Do not guess when meaning is unclear.
 - **Platform coverage:** Only Codex CLI on macOS was runtime validated. Other platforms and ChatGPT desktop Plugin runtime remain untested; see [Compatibility](#compatibility).
 - **Evidence privacy:** URL metadata is redacted, but secrets rendered inside the page remain visible in both raw and final screenshots. Review captures before sharing them.
 
-The unverified variants are tracked in the [requirement traceability matrix](docs/REQUIREMENT-TRACEABILITY.md). They are limitations of the v0.1.0 validation scope, not claims of runtime support.
+The unverified variants are tracked in the [requirement traceability matrix](docs/REQUIREMENT-TRACEABILITY.md); they are limitations, not claims of runtime support.
 
 See [SECURITY.md](SECURITY.md) for handling sensitive targets and [CONTRIBUTING.md](CONTRIBUTING.md) for the task-branch → PR → review → develop workflow, validation guidance, and public-safe examples.
