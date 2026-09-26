@@ -41,7 +41,15 @@ Prioritize correctness, regressions, security, privacy, requirement compliance, 
 maintainability, and documentation. Separate blocking findings from non-blocking suggestions.
 ```
 
-The reviewer is strictly read-only. It reports findings to the Main Agent and must not modify files, implement fixes, commit, amend, push, rebase, merge, change settings, or resolve comments by editing. Review feedback must distinguish `BLOCKER`, `HIGH`, `MEDIUM`, `LOW`, and `SUGGESTION`, and include the affected file/location, problem, impact, and recommended direction where applicable. Use this format:
+The reviewer is strictly read-only. It reports findings to the Main Agent and must not modify files, implement fixes, commit, amend, push, rebase, merge, change settings, or resolve comments by editing. Review feedback must distinguish `BLOCKER`, `HIGH`, `MEDIUM`, `LOW`, and `SUGGESTION`, and include the affected file/location, problem, impact, and recommended direction where applicable:
+
+- `BLOCKER`: correctness, privacy, security, data-integrity, or requirement failure that must be fixed before merge.
+- `HIGH`: important risk strongly expected to be fixed; do not merge with an unresolved HIGH finding unless the Main Agent records a clear justification.
+- `MEDIUM`: meaningful concern that should usually be fixed or explicitly deferred with a reason.
+- `LOW`: minor-impact concern that may remain when its impact is understood.
+- `SUGGESTION`: optional improvement, not a merge blocker.
+
+Do not manufacture findings to fill categories or elevate stylistic preferences into blockers. Use this format:
 
 ```text
 Overall Review: APPROVE or CHANGES REQUESTED
