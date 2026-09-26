@@ -1,0 +1,12 @@
+# Copy this outside the public Skill and adapt it for one project.
+# Do not store credentials or private URLs in a public repository.
+environment:
+  name: Local
+  base_url: http://localhost:3000
+authentication:
+  strategy: existing-session
+evidence:
+  screenshots: meaningful-steps
+  show_url: true
+testing:
+  destructive_actions: confirm

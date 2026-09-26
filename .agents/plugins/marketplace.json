@@ -1,0 +1,20 @@
+{
+  "name": "prompt-ui-tester-local",
+  "interface": {
+    "displayName": "Prompt UI Tester (Local)"
+  },
+  "plugins": [
+    {
+      "name": "prompt-ui-testing",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

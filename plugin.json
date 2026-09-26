@@ -1,0 +1,8 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "prompt-ui-testing",
+  "version": "0.1.0",
+  "description": "Prompt-driven black-box testing of web user interfaces with URL-visible evidence.",
+  "license": "MIT",
+  "keywords": ["agent-skill", "ui-testing", "browser-testing", "playwright-mcp"]
+}
