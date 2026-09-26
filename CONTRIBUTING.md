@@ -104,6 +104,12 @@ For evidence-helper changes, install `requirements.txt` and run:
 python3 -m unittest discover -s tests -v
 ```
 
+For the Chromium Fullscreen configuration helper, also run:
+
+```sh
+node --test tests/test_chrome_window_mode.cjs
+```
+
 Check that raw screenshot pixels remain intact in the composed image, sensitive URL parts are redacted, and the active URL is readable. For Skill policy changes, walk through a representative prompt and confirm the expected status, safety decision, and evidence behavior. See [docs/PLAN.md](docs/PLAN.md) for the full validation phases.
 
 ## Release privacy checks
