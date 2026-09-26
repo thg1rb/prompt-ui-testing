@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.1.3 release candidate — 2026-09-26 (not yet published)
+## v0.1.3 — 2026-09-26
 
 Fullscreen browser execution improvement for desktop UI testing.
 
@@ -14,6 +14,8 @@ Fullscreen browser execution improvement for desktop UI testing.
 
 - Chrome 154, headed Fullscreen, viewport tracking, isolated restart behavior, localhost and remote navigation, URL-visible evidence, redaction, and fallback behavior validated with Playwright MCP 0.0.82 on macOS.
 - Sanitized authenticated-application dogfooding: **PASS** for Fullscreen, form interaction, authentication flow, post-login navigation, and URL-visible evidence. Private targets and artifacts are not included.
+
+- Post-release fresh-clone installation and public `example.com` browser smoke: **PASS**; the installed Skill was discovered, Chrome opened headed in Fullscreen, and URL-visible evidence was verified.
 
 ### Notes
 
