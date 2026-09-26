@@ -32,3 +32,5 @@ Review summary/findings disposition:
 - [ ] Documentation is updated where needed.
 
 Use a merge commit when merging an approved task PR into `develop`. Do not merge task PRs directly into `main`.
+
+This checklist records the required process but cannot technically block a merge. GitHub branch-protection changes require separate authorization.

@@ -112,4 +112,4 @@ The metadata check scans reachable commit author and committer fields plus annot
 
 ### Branch protection recommendations
 
-These are recommendations for repository administrators; contributors and Agents must not change GitHub settings as part of ordinary work. Protect `main` against ordinary direct pushes and prefer reviewed release promotion with relevant required checks. Prefer PRs from task branches into `develop`, requiring review and practical validation checks before merge. Settings changes require separate authorization.
+These are recommendations for repository administrators; contributors and Agents must not change GitHub settings as part of ordinary work. Protect `main` against ordinary direct pushes and prefer reviewed release promotion with relevant required checks. Prefer PRs from task branches into `develop`, requiring review and practical validation checks before merge. The Agent instructions and PR template make the workflow explicit, but they do not technically prevent a GitHub merge when skipped; only repository merge-protection settings can enforce that gate. Settings changes require separate authorization.
