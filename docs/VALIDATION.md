@@ -196,9 +196,43 @@ The whitespace-only exploratory submission was not treated as a product defect: 
 - **Installation smoke tests:** No installation instructions, manifest, or package files changed in this phase; project, user/global, and Plugin installation evidence from the prior phase remains valid.
 - **Privacy review:** PASS — repository scan found no private organization material. Only generic fixture text, `example.com`, loopback URLs, `Sample User`, and synthetic token values were used. Fake credentials and screenshots remained in temporary validation artifacts; the fake password was not recorded in public documentation.
 
-### Remaining before Final Release Readiness Review
+### Gaps recorded at the end of matrix validation
 
 - **PARTIAL control coverage:** autocomplete/custom combobox, tab switching, number/textarea, and drag-and-drop upload variants were not separately exercised. Basic select, checkbox, radio, date/time, file input, dialog, and pagination were exercised.
 - **PARTIAL authentication and recovery coverage:** real SSO/MFA handoff, authenticated profile reuse, hot reload, minor UI drift, and measured retry bounds remain untested.
 - **Platform coverage:** Codex CLI on macOS is runtime validated. ChatGPT desktop Plugin runtime and other operating systems remain NOT TESTED.
-- Final regression and the release-readiness review are still required. **Do not publish or tag v0.1.0 in this phase.** The repository can proceed to Final Release Readiness Review with the above gaps explicit; this matrix does not declare it release-ready.
+- At that phase exit, final regression and release readiness were still pending. The release review and current disposition are recorded below.
+
+## Final Release Readiness Review — 2026-09-26
+
+### Result and requirement coverage
+
+- **Release candidate:** `v0.1.0`
+- **Overall status:** READY FOR v0.1.0. No concrete release blocker was found. No tag or publication was created.
+- **Current traceability totals:** 111 rows; 105 PASS, 0 FAIL, 6 PARTIAL, 0 NOT TESTED, 0 NOT APPLICABLE, 0 BLOCKED. REQ-047 and REQ-111 moved from PARTIAL to PASS after the artifact and publication-suitability review. Earlier phase tables retain their as-of-phase counts.
+- **Remaining PARTIAL decisions:** REQ-010, REQ-011, REQ-022, REQ-028, REQ-029, and REQ-103 are acceptable v0.1.0 limitations. Their unverified variants and safe fallbacks are summarized in README and detailed in the traceability matrix. Each is listed with its decision in [RELEASE-READINESS.md](RELEASE-READINESS.md).
+
+### Public documentation and platform claims
+
+- README now contains Compatibility and Known Limitations sections and Windows-specific Python environment commands. The 0.1.0 changelog summarizes the validated workflow and explicitly points to known limits.
+- Current official Skill, Plugin, MCP, and Playwright documentation was checked. README correctly presents Playwright MCP as a separate dependency (Node.js 20+), covers browser first-use/download behavior, possible host approval, MCP restart/fresh-process behavior, and `BLOCKED` behavior when browser execution is unavailable.
+- **Runtime coverage:** Codex CLI on macOS, including project, user/global, and Plugin installations, is validated. ChatGPT desktop Plugin runtime and other operating systems are documented as untested; their design compatibility is not represented as runtime validation.
+
+### Security, privacy, evidence, and hygiene
+
+- **Security review:** PASS. Production safety and explicit intent for consequential actions are documented. The helper accepts a URL through structured stdin, performs no shell execution, redacts URL metadata, and retains raw screenshots. Input/output paths are explicit caller arguments and are not derived from target-page content; instructions use isolated evidence workspaces. Documentation does not claim that metadata redaction removes secrets visible in page pixels.
+- **Privacy review:** PASS. Tracked public content uses generic examples and public documentation links. No real credentials, private targets, organization-specific examples, private screenshots, or validation artifacts were found in the repository; credential-like values in helper tests are synthetic redaction inputs.
+- **Evidence review:** PASS using the existing helper tests and integration/concurrency records. Browser-observed URL strips, redirects, SPA changes, redaction, image preservation, and isolated concurrent evidence were validated in earlier phases.
+- **Repository hygiene:** PASS. No in-repository virtualenv, browser profile, screenshots, caches, or validation workspaces were found; `.gitignore` covers the current Python and evidence artifacts. The working tree was clean before this review, and no v0.1.0 tag exists.
+
+### Final regression
+
+- **Skill validator:** PASS — `quick_validate.py skills/prompt-ui-testing`.
+- **Helper tests:** PASS — all 8 unit tests, run with an isolated temporary Python environment containing Pillow.
+- **Browser smoke evidence:** PASS by reuse of the same-date remote (`https://example.com`) and localhost redirect/form/SPA Playwright MCP scenarios documented above. No browser scenario was rerun because this release review changed public documentation only and Playwright MCP was not exposed in the current review process.
+- **README installation smoke:** PASS — copied the Skill into a new temporary project's `.agents/skills/prompt-ui-testing`, created its `.venv`, installed Pillow, and started a fresh Codex CLI session. Explicit Skill invocation discovered the installed copy, read its references, and returned the requested plan-only response without browser calls. This smoke covers the macOS/Unix command path; Windows commands remain untested.
+- **PASS/FAIL/BLOCKED classification and URL-visible evidence:** PASS by reuse of the full matrix records, including expected FAIL, BLOCKED, and INCONCLUSIVE results and visually audited screenshots.
+- **Documentation and manifests:** PASS — Markdown links checked, JSON manifests parse, and `git diff --check` passes.
+- **Installation smoke:** Existing Project, User/Global, and Plugin runtime records remain applicable. The README's Unix copy and Pillow setup path was exercised in a clean temporary project; no Plugin or manifest command changed. Windows commands were added as unvalidated platform guidance, not as a runtime support claim.
+
+No implementation defect was found. Deferred variants and untested platform runtimes are documented limitations, not blockers for this candidate.

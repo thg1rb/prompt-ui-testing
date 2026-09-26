@@ -38,12 +38,21 @@ python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
 ```
 
-The Skill prefers the target project's `.venv` interpreter when it can import Pillow; use `.venv/Scripts/python.exe` on Windows. When installing into a project or user folder that does not contain this repository's `requirements.txt`, create a project environment and install Pillow directly:
+On Windows PowerShell, create and install into the equivalent environment with:
+
+```powershell
+py -3 -m venv .venv
+.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+The Skill prefers the target project's `.venv` interpreter when it can import Pillow. When installing into a project or user folder that does not contain this repository's `requirements.txt`, create a project environment and install Pillow directly:
 
 ```sh
 python3 -m venv .venv
 .venv/bin/python -m pip install 'Pillow>=10,<13'
 ```
+
+On Windows PowerShell, use `py -3 -m venv .venv` followed by `.venv\Scripts\python.exe -m pip install 'Pillow>=10,<13'`.
 
 Codex detects newly installed skills automatically; start a new session if the Skill does not appear. See the [current Codex Skill documentation](https://learn.chatgpt.com/docs/build-skills) for supported locations and host behavior.
 
@@ -61,6 +70,17 @@ Playwright's install guide says the browser downloads automatically on first use
 The browser capability must support navigation, semantic inspection, requested controls, active URL retrieval, and screenshots. If Playwright MCP is absent, unavailable, or denied, the Skill must report `BLOCKED` (or another accurate execution limitation) without claiming browser execution or evidence. If a requested control or URL-visible evidence cannot be produced, explain the limitation.
 
 For a local app, run its server before testing. A remote or containerized browser may not share your machine's `localhost`; use a browser on the same machine or an explicitly provided reachable endpoint. A browser-to-localhost network limitation is `BLOCKED`, not an application failure.
+
+## Compatibility
+
+| Environment | Status |
+| --- | --- |
+| Codex CLI on macOS | Runtime validated, including project, user, and Plugin installation with Playwright MCP. |
+| Codex CLI on Windows or Linux | Intended to work with the documented Skill paths and platform-specific Python environment; not runtime validated. |
+| ChatGPT desktop Plugin runtime | Supported by the documented Plugin/MCP model; not runtime validated for this Skill. |
+| Other Agent Skill hosts | The Skill follows the `SKILL.md` folder format, but host discovery, tool permissions, and helper execution are not validated here. |
+
+Playwright MCP and Pillow are separate prerequisites. Install/configure them in the environment that runs the agent. Codex CLI and the desktop app share Codex MCP configuration. After changing MCP configuration, start a fresh CLI process or use the desktop app's **Restart** action. A host can request approval for browser tools; availability does not mean calls are pre-approved. The browser is downloaded on first use in a clean Playwright setup, but a missing selected browser may require Playwright's browser install command. See the sections above for setup details. If the compatible browser tool is missing, denied, or cannot reach the target, the Skill must report the execution limitation without claiming that it ran a test.
 
 ## Use it
 
@@ -112,5 +132,15 @@ Start a fresh Codex session after installing the plugin. For local marketplace c
 - Browser capability, file access, and network topology vary by host. The Skill reports missing prerequisites as `BLOCKED`.
 - Screenshot comparison is not pixel-perfect visual regression without a separate comparison capability and baseline.
 - URL redaction protects the visible metadata strip, not secrets already shown on the page or in the retained raw screenshot.
+
+### Known limitations
+
+- **Control coverage:** Common text, password, select, checkbox, radio, date/time, file-input, dialog, and pagination interactions were exercised. Custom combobox/autocomplete, tab switching, number/textarea, and drag-and-drop upload variants were not individually validated; use semantic controls the browser exposes, otherwise report the limitation.
+- **Authentication and recovery:** Disposable login and unavailable-SSO handling were validated. Real SSO/MFA handoff and authorized profile reuse were not; hot reload, minor UI drift recovery, and measured retry bounds were not directly tested. Stop at unavailable authentication and report `BLOCKED` rather than bypassing it.
+- **Dynamic UI and wording:** SPA navigation, redirects, delayed content, and modal behavior were exercised. Lazy loading, toast-specific behavior, and hot-reload recovery were not; ambiguous equivalent labels were not separately tested. Do not guess when meaning is unclear.
+- **Platform coverage:** Only Codex CLI on macOS was runtime validated. Other platforms and ChatGPT desktop Plugin runtime remain untested; see [Compatibility](#compatibility).
+- **Evidence privacy:** URL metadata is redacted, but secrets rendered inside the page remain visible in both raw and final screenshots. Review captures before sharing them.
+
+The unverified variants are tracked in the [requirement traceability matrix](docs/REQUIREMENT-TRACEABILITY.md). They are limitations of the v0.1.0 validation scope, not claims of runtime support.
 
 See [SECURITY.md](SECURITY.md) for handling sensitive targets and [CONTRIBUTING.md](CONTRIBUTING.md) for validation and public-safe examples.
