@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.1.3 release candidate — 2026-09-26 (not yet published)
+
+Fullscreen browser execution improvement for desktop UI testing.
+
+### Changed
+
+- Prefer Google Chrome in headed, isolated Fullscreen sessions.
+- Use maximized mode as a fallback when Fullscreen cannot be established.
+- Preserve isolated state per independent case and one session across that case's steps.
+
+### Validation
+
+- Chrome 154, headed Fullscreen, viewport tracking, isolated restart behavior, localhost and remote navigation, URL-visible evidence, redaction, and fallback behavior validated with Playwright MCP 0.0.82 on macOS.
+- Sanitized authenticated-application dogfooding: **PASS** for Fullscreen, form interaction, authentication flow, post-login navigation, and URL-visible evidence. Private targets and artifacts are not included.
+
+### Notes
+
+- Computer Use is not required for normal Fullscreen browser execution.
+- Fullscreen runtime validation covers macOS only. Other operating systems and multi-monitor placement remain unvalidated; headless runs do not use desktop Fullscreen.
+
 ## v0.1.2 — 2026-09-26
 
 Browser-execution and test-isolation improvements for the existing Skill.
