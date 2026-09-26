@@ -2,7 +2,7 @@
 
 `prompt-ui-testing` is a reusable Agent Skill for prompt-driven, black-box testing of web applications. Give the agent a URL, actions, and an expected UI result. The Skill guides browser interaction, evidence capture, and an honest `PASS`, `FAIL`, `BLOCKED`, or `INCONCLUSIVE` report. It supports remote sites and applications running at `localhost` or `127.0.0.1`.
 
-**Current release:** [`v0.1.2`](https://github.com/thg1rb/prompt-ui-testing/releases/tag/v0.1.2). See the [changelog](CHANGELOG.md) and [release record](docs/releases/v0.1.2.md). The earlier `v0.1.0` release was withdrawn and superseded by `v0.1.1` after Git metadata privacy remediation; see the [remediation record](docs/PRIVACY-REMEDIATION.md).
+**Current release:** [`v0.1.2`](https://github.com/thg1rb/prompt-ui-testing/releases/tag/v0.1.2). **Release candidate:** `v0.1.3` (publication pending). See the [changelog](CHANGELOG.md), [v0.1.2 release record](docs/releases/v0.1.2.md), and [v0.1.3 release-candidate record](docs/releases/v0.1.3.md). The earlier `v0.1.0` release was withdrawn and superseded by `v0.1.1` after Git metadata privacy remediation; see the [remediation record](docs/PRIVACY-REMEDIATION.md).
 
 The target application needs no code changes, test files, selectors, or automation scripts. The Skill supplies policy and workflow; a separate browser capability performs the actions. [Playwright MCP](https://playwright.dev/mcp/installation) is preferred.
 
@@ -65,13 +65,13 @@ Codex detects newly installed skills automatically; start a new session if the S
 Playwright MCP is a separate dependency; installing this Skill does not install or configure it. It requires Node.js 20 or newer. For Codex CLI, add the server using the current [Codex MCP command format](https://learn.chatgpt.com/docs/extend/mcp) and [Playwright MCP package](https://playwright.dev/mcp/installation):
 
 ```sh
-codex mcp add playwright -- npx --yes @playwright/mcp@latest --browser=chrome --isolated --config /absolute/path/to/playwright-mcp-config.json
+codex mcp add playwright -- npx --yes @playwright/mcp@0.0.82 --browser=chrome --isolated --config /absolute/path/to/playwright-mcp-config.json
 codex mcp list
 ```
 
-This selects Google Chrome and an in-memory isolated profile; headed mode is Playwright MCP's default, so no `--headless` flag is needed. Each independent test should close its browser session before the next starts. For best-effort maximization, Playwright MCP supports a JSON config file with `browser.launchOptions.args: ["--start-maximized"]` and `browser.contextOptions.viewport: null`; see [Playwright MCP options](https://playwright.dev/mcp/configuration/options). [Playwright warns](https://playwright.dev/docs/api/class-browsertype#browser-type-launch) that custom browser arguments can affect automation, so validate this on the host. Do not add `--incognito` or describe Chrome's native Incognito UI as active: isolated Playwright state is the default privacy behavior. Headless mode is optional when explicitly requested.
+This selects Google Chrome and an in-memory isolated profile; headed mode is Playwright MCP's default. Each independent test uses a fresh browser session, while all steps within one case remain in that session. Configure Fullscreen by default and allow the page viewport to follow the window. The MCP `initPage` hook below also requests maximized mode if Fullscreen cannot be established. Do not add `--incognito` or describe Chrome's native Incognito UI as active: isolated Playwright state is the default privacy behavior. Headless mode is optional when explicitly requested.
 
-The following config was verified with Playwright MCP `0.0.82` and Google Chrome on macOS:
+The following config was verified with Playwright MCP `0.0.82` and Google Chrome on macOS. Replace the helper path with the absolute path to the installed Skill's `scripts/chrome-window-mode.cjs` file:
 
 ```json
 {
@@ -81,16 +81,17 @@ The following config was verified with Playwright MCP `0.0.82` and Google Chrome
     "launchOptions": {
       "channel": "chrome",
       "headless": false,
-      "args": ["--start-maximized"]
+      "args": ["--start-fullscreen"]
     },
     "contextOptions": {
       "viewport": null
-    }
+    },
+    "initPage": ["/absolute/path/to/prompt-ui-testing/scripts/chrome-window-mode.cjs"]
   }
 }
 ```
 
-Save the JSON as a local file outside a public repository at the absolute path used in the command above. If a `playwright` server is already configured, update its command arguments to use this config rather than leaving the previous setup in place. The tested window's outer size matched the available desktop area. Other operating systems and display environments are not validated; if maximization does not work, keep testing in the visible headed window and report that setup limitation.
+Save the JSON as a local file outside a public repository at the absolute path used in the command above. If a `playwright` server is already configured, update its command arguments to use this config rather than leaving the previous setup in place. The `--start-fullscreen` argument alone did not set Chrome's native Fullscreen window state on the tested macOS host; the `initPage` helper uses Chromium's DevTools Protocol to set and verify the state, then tries maximized mode as fallback. `viewport: null` disables fixed viewport emulation so the web page follows the actual Fullscreen content area. Fullscreen behavior outside macOS is not yet runtime-validated. See the [browser strategy](skills/prompt-ui-testing/references/browser-strategy.md) for fallback and reporting behavior.
 
 Playwright's install guide says the browser downloads automatically on first use. If Google Chrome is unavailable, report that limitation and use another browser only if the user allows it or the documented fallback applies. Do not silently change browser identity when it matters to the test. Start a fresh Codex process after adding the server; an already-running session may retain its previous tool list. In the ChatGPT desktop app, MCP configuration is shared with Codex CLI; add the server under **Settings → MCP servers** and select **Restart**. The host may request approval before browser tool calls. Do not globally approve an MCP server unless you trust it. In non-interactive runs that cannot answer approval prompts, configure the server's `default_tools_approval_mode` for that run; this validation used `approve` only for its disposable Playwright session because its CLI approval policy was `never`. See the [Codex MCP settings](https://learn.chatgpt.com/docs/extend/mcp#configure-with-configtoml) for supported approval values.
 
@@ -164,7 +165,7 @@ Start a fresh Codex session after installing the plugin. For local marketplace c
 
 - **Control coverage:** Common text, password, select, checkbox, radio, date/time, file-input, dialog, and pagination interactions were exercised. Custom combobox/autocomplete, tab switching, number/textarea, and drag-and-drop upload variants were not individually validated; use semantic controls the browser exposes, otherwise report the limitation.
 - **Authentication and recovery:** Disposable login and unavailable-SSO handling were validated. Real SSO/MFA handoff and authorized profile reuse were not; hot reload, minor UI drift recovery, and measured retry bounds were not directly tested. Stop at unavailable authentication and report `BLOCKED` rather than bypassing it.
-- **Browser session and window modes:** Independent cases use fresh isolated state by default. Reusing explicitly supplied storage state is supported and must be disclosed; real authenticated profile reuse is not runtime validated. Native Chrome Incognito UI is not required, true OS fullscreen is not guaranteed, and maximization is best-effort. Chrome 154 headed/isolation/maximization behavior was runtime validated on macOS only.
+- **Browser session and window modes:** Independent cases use fresh isolated state by default. Reusing explicitly supplied storage state is supported and must be disclosed; real authenticated profile reuse is not runtime validated. Native Chrome Incognito UI is not required. Fullscreen is preferred and maximized mode is the fallback. Chrome 154 headed, isolated, Fullscreen, and actual page-viewport behavior were runtime validated on macOS only; fallback is covered by a helper test but has not been exercised on a host where Fullscreen is unavailable. Headless runs do not use desktop Fullscreen. Multi-monitor selection is not controlled.
 - **Dynamic UI and wording:** SPA navigation, redirects, delayed content, and modal behavior were exercised. Lazy loading, toast-specific behavior, and hot-reload recovery were not; ambiguous equivalent labels were not separately tested. Do not guess when meaning is unclear.
 - **Platform coverage:** Only Codex CLI on macOS was runtime validated. Other platforms and ChatGPT desktop Plugin runtime remain untested; see [Compatibility](#compatibility).
 - **Evidence privacy:** URL metadata is redacted, but secrets rendered inside the page remain visible in both raw and final screenshots. Review captures before sharing them.

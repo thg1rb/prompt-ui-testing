@@ -294,3 +294,72 @@ Successful raw and composed screenshots were visually inspected from the disposa
 - Native Chrome Incognito UI and true OS fullscreen were not used or claimed. Maximization is best-effort.
 - Real SSO/MFA and persistent authenticated profile reuse remain untested. Only explicit synthetic storage-state restoration was exercised.
 - An existing validated expected-error scenario produced the expected `FAIL`; the unavailable-prerequisite scenario produced `BLOCKED`. These were reused rather than manufacturing a failure in the release-candidate fixture.
+
+## Chrome Fullscreen browser behavior — 2026-09-26
+
+### Environment and configuration
+
+- macOS `27.0`, Node.js `v24.13.1`, Playwright MCP `0.0.82`, Google Chrome `154.0.8037.57`.
+- The MCP server was started with the package's stdio transport from a disposable Node MCP client. The process-only config used `channel: "chrome"`, `headless: false`, `--start-fullscreen`, `isolated: true`, `contextOptions.viewport: null`, and the packaged `chrome-window-mode.cjs` `initPage` hook. No persistent Codex MCP settings were changed.
+- `navigator.userAgentData.fullVersionList` reported `Google Chrome 154.0.8037.57`. `page.viewportSize()` returned `null`.
+- In the primary localhost run, the host reported a `1920×1080` screen and `1920×1050` available area at DPR 1. After the Fullscreen transition settled, Chromium reported `windowState: fullscreen`; the browser content bounds and page viewport were `1920×992`, and the raw screenshot was `1920×992`. A separate isolated run selected a display reported as `1800×1169` and produced an `1800×1042` page viewport and raw screenshot. This confirms that the viewport varies with the browser-selected display/window; no monitor dimensions were hardcoded or explicitly selected. `page.viewportSize()` returned `null` in both headed runs.
+
+### Scenarios
+
+| Scenario | Expected | Actual | Result |
+| --- | --- | --- | --- |
+| Chrome identity and headed Fullscreen localhost case | Visible Google Chrome starts in Fullscreen, the page follows the browser content area, and a safe interaction succeeds | Chrome `154.0.8037.57` was identified. CDP reported `windowState: fullscreen`; viewport was `1920×992` on a `1920×1080` screen. The fixture rendered its desktop layout, the Save state button updated the UI and synthetic storage, and the same case session retained that state | PASS |
+| Independent case and browser restart | A new isolated test starts Fullscreen without state from the previous case | A new MCP server process reported Fullscreen again. The fixture found no prior cookie, local-storage, or session-storage marker; its desktop layout remained active | PASS |
+| Remote navigation | Safe public page loads with its expected heading and Fullscreen viewport | `https://example.com/` loaded; the heading and title were `Example Domain`; CDP reported Fullscreen; the raw screenshot and page viewport were `1800×1042` on the display selected for that session | PASS |
+| Fullscreen screenshot and URL composition | Raw screenshot matches the page viewport; final evidence shows the browser-observed URL and preserves page pixels | Raw localhost and remote screenshots were `1920×992` and `1800×1042`, respectively. The composed URL-visible images were `1920×1046` and `1800×1096`; each displayed the actual observed URL above the page. Both were visually inspected | PASS |
+| Responsive layout | The app uses the actual Fullscreen content viewport, not a fixed or guessed size | Local fixture reported `1920×992 desktop layout`, above its `1600px` desktop breakpoint. In the separate `1800×1042` session, the page viewport and raw screenshot also matched the selected window content size | PASS |
+| Maximized fallback and unverified reporting | Failed Fullscreen uses maximized mode when available; unavailable window control is not claimed as Fullscreen | Node's built-in tests simulated CDP returning normal after the Fullscreen request, then confirmed a maximized request and `maximized-fallback` report. A CDP-unavailable case reported `unverified`. A real unsupported-host fallback was not available on this macOS host | PASS (simulated fallback) |
+| Explicit headless mode | Headless execution does not request or claim Fullscreen | Headless Chrome was identified by its standard user-agent marker; the helper skipped window control and CDP remained `normal` (`756×469` page viewport in an `800×600` virtual screen) | PASS |
+
+### Findings and fixes
+
+| Finding | Observed behavior and root cause | Fix and retest |
+| --- | --- | --- |
+| Fullscreen launch flag and direct state request were insufficient | With `--start-fullscreen` alone, CDP reported a normal `1200×1006` Chrome window and page viewport `1200×919`. A direct Fullscreen request from a normal window also remained normal on this Playwright MCP/macOS path. Maximizing first, then requesting Fullscreen, succeeded | The `initPage` helper now establishes a maximized base window before requesting Fullscreen through Chromium's `Browser.setWindowBounds`. It verifies the final state and falls back to maximized if needed. Fresh MCP reruns reported Fullscreen and the responsive fixture used the `1920×992` content viewport |
+| Fullscreen state could be transient during startup | A timing trace showed an intermediate `1920×1080` viewport followed about `600ms` later by the settled `1920×992` content area. The first helper version could accept an early Fullscreen state without waiting for the native transition | The helper now samples CDP bounds and viewport metrics every `100ms`, requires them unchanged for `700ms`, and applies a five-second bound. Local and remote retests confirm the settled Fullscreen state before interaction or capture |
+| CDP can report Fullscreen in headless Chrome | A headless MCP run returned `windowState: fullscreen` after a protocol request, even though its browser was not visible. CDP window state alone does not prove headed execution | The helper now detects the standard `HeadlessChrome` user-agent marker and skips window controls. The headless retest remained `normal`; a unit test confirms no CDP session or Fullscreen request is made |
+
+### Regression and limitations
+
+- `node --test tests/test_chrome_window_mode.cjs`: 4 passed, including Fullscreen success, maximized fallback, unverified-mode reporting, and headless behavior.
+- `node` MCP-client scenarios exercised remote navigation, localhost interaction, browser restart, independent-session state isolation, CDP window-state inspection, and URL-visible evidence composition. The change was not run through a Codex Agent session because the current Agent tool surface did not expose Playwright MCP directly; the Playwright MCP server itself was exercised over stdio.
+- True Fullscreen and viewport behavior were runtime validated on macOS with Chrome `154.0.8037.57` only. Windows, Linux, explicit multi-monitor placement, and a real-host maximized fallback remain unvalidated. Chrome/OS chooses the display; the Skill does not move windows between monitors. A failed window-mode request is reported as a browser/runtime limitation, not an application `FAIL`.
+- `--start-fullscreen` is retained as the startup preference, but the validated MCP hook is needed for this runtime. Headless execution does not claim Fullscreen. Native Chrome Incognito is not used; the MCP isolated context remains the session privacy mechanism. Computer Use is not required.
+
+## v0.1.3 release-candidate validation — 2026-09-26
+
+### Environment and configuration
+
+- macOS `27.0`, Node.js `v24.13.1`, Playwright MCP `0.0.82`, Google Chrome `154.0.8037.57`.
+- Used a disposable Node MCP client over stdio with `--browser=chrome --isolated`; `headless` was `false`, `--start-fullscreen` was set, and `contextOptions.viewport` was `null`. The packaged `chrome-window-mode.cjs` hook maximized first, requested Fullscreen over CDP, and verified a stable window/viewport before navigation. No persistent MCP settings changed.
+- Browser identity was checked using `navigator.userAgentData.fullVersionList`; CDP `Browser.getWindowForTarget` reported `windowState: fullscreen`. `page.viewportSize()` returned `null`.
+- The selected display reported `1920×1080` CSS pixels; the Fullscreen content viewport, CDP bounds, `innerWidth/innerHeight`, and raw screenshot were all `1920×992`. No monitor resolution was configured or hardcoded.
+- Browser automation used only a disposable localhost fixture and `https://example.com`. All evidence images and fixture data remained outside the repository.
+
+### Release-candidate scenarios
+
+| Scenario | Expected | Actual | Result |
+| --- | --- | --- | --- |
+| Chrome, headed Fullscreen, and viewport | Branded Chrome is headed, CDP confirms Fullscreen, and the page viewport follows the window | Chrome `154.0.8037.57` was identified; headless was disabled; CDP reported `fullscreen`; viewport and bounds were `1920×992` on the selected `1920×1080` screen | PASS |
+| Local interaction and same-case continuity | One case uses one isolated session across steps and interaction updates visible UI/state | The fixture began with no cookie or web-storage state. Filling `TEST-001` and clicking Save updated the page and cookie, local storage, and session storage in the same session | PASS |
+| Independent case and browser restart | A fresh session starts in Fullscreen and inherits no state from the previous case | A second MCP server/browser session reported Fullscreen and found no prior cookie, local-storage, or session-storage marker | PASS |
+| Responsive viewport | Application layout uses the actual Fullscreen content viewport rather than fixed emulation | The fixture reported `1920×992 desktop layout`; `viewport: null` and page dimensions matched the Fullscreen CDP bounds | PASS |
+| Safe public remote navigation | `https://example.com/` loads its expected heading in Fullscreen Chrome | Google Chrome reported Fullscreen at `1920×992`; title and heading were `Example Domain` | PASS |
+| Screenshot and URL evidence | Raw screenshot represents the tested viewport; composed screenshot shows the observed URL, preserves content, and redacts sensitive URL values | Local and remote raw images were `1920×992`; composed images were `1920×1046`. The local synthetic query value appeared as `[REDACTED]`; both URL strips and page content were visually inspected | PASS |
+| Result classification | Expected UI outcome is classified as successful | The local Save confirmation and remote heading matched their expected results; both smoke cases were classified `PASS` | PASS |
+| Maximized fallback and unverified mode | Unsupported Fullscreen uses an honest maximized fallback; unverified state is not claimed as success | Helper tests simulated Fullscreen rejection and confirmed `maximized-fallback`; CDP-unavailable case reported `unverified`. A real unsupported-host fallback was not available | PASS (simulated fallback) |
+| Authenticated private-application dogfooding | Real authenticated UI flow completes in the new Fullscreen mode with URL-visible evidence | User-confirmed dogfooding passed for Google Chrome, headed Fullscreen, form interaction, authentication flow, post-login navigation, and URL-visible evidence. No target details, screenshots, credentials, logs, or paths are included here | PASS (sanitized confirmation) |
+
+A transient authentication-related application/network response was observed during the private dogfooding login sequence; the expected UI flow completed successfully. This is recorded generically and was not attributed to Skill behavior.
+
+### Regression and limitations
+
+- Skill validator: **PASS**. Python helper/privacy tests: **13 passed**. Fullscreen helper tests: **4 passed**. Git metadata privacy guard: **PASS**. Plugin manifest parse and relative Markdown link validation: **PASS**. `git diff --check`: **PASS**.
+- The Fullscreen browser scenarios used the direct Playwright MCP stdio client because Playwright MCP was not exposed directly in the current Agent tool surface; no Codex Agent execution is claimed by these rows.
+- True Fullscreen and viewport behavior are runtime validated on macOS with Chrome `154.0.8037.57` and Playwright MCP `0.0.82`. Other operating systems, explicit multi-monitor placement, and real-host maximized fallback remain unvalidated. Headless execution does not use desktop Fullscreen.
+- Native Chrome Incognito UI and Computer Use are not required. Existing URL evidence redaction and PASS/FAIL/BLOCKED/INCONCLUSIVE policies are unchanged.
