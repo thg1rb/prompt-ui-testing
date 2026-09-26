@@ -357,6 +357,21 @@ Successful raw and composed screenshots were visually inspected from the disposa
 
 A transient authentication-related application/network response was observed during the private dogfooding login sequence; the expected UI flow completed successfully. This is recorded generically and was not attributed to Skill behavior.
 
+## v0.1.3 post-release validation — 2026-09-26
+
+| Scenario | Expected | Actual | Result |
+| --- | --- | --- | --- |
+| Fresh public source | Retrieve the published tag and verify its Git metadata | A clean shallow clone checked out `v0.1.3` at release commit `f29d76fcfd0308e01fae6292049a5fc0de5cf24d`; the metadata guard passed | PASS |
+| Files and dependencies | Released files are complete and no development-only files are needed | The Skill folder and `requirements.txt` were available from the tag; a disposable project installed Pillow using the documented dependency | PASS |
+| Skill validation and discovery | Installed Skill validates and activates in an unrelated project | The Skill validator passed; a fresh Codex CLI `0.157.1` session loaded `prompt-ui-testing` for a plan-only request and performed no navigation | PASS |
+| Browser smoke | Fresh installation uses headed isolated Fullscreen Google Chrome and observes the expected public page | Playwright MCP `0.0.82` launched Google Chrome `154.0.8037.57` on macOS; `https://example.com/` displayed the expected title and heading. The browser was visibly headed and CDP reported `windowState: fullscreen` | PASS |
+| Viewport | Page uses the available Fullscreen content area without fixed viewport emulation | `screen` was `1920×1080`; page inner/outer dimensions were `1920×992`; Playwright viewport was `null` | PASS |
+| URL-visible evidence | Final screenshot shows the active browser URL and page content | Browser-observed URL `https://example.com/` appeared in the composed evidence strip. Raw screenshot was `1920×992`; composed screenshot was `1920×1046`; image was visually inspected. Artifacts remain outside the repository | PASS |
+| File privacy and secrets | Fresh public artifact contains no private dogfooding data or high-confidence secrets | Public-safe content scan and high-confidence secret-pattern scan passed; no dogfooding URL or screenshot was included | PASS |
+| Regression | Released Skill and helpers remain valid | On the fresh public clone, Skill validator passed, Python helper/privacy suite passed (13 tests), Fullscreen helper suite passed (4 tests), and Git metadata guard passed | PASS |
+
+Environment: macOS; Codex CLI `0.157.1`; Playwright MCP `0.0.82`; Google Chrome `154.0.8037.57`; Node.js `24.13.1`. This post-release browser smoke used the Playwright MCP stdio client with the configuration copied from the fresh-installed Skill; it does not claim a second Agent-mediated execution. Fullscreen runtime support beyond macOS and explicit multi-monitor placement remain unvalidated.
+
 ### Regression and limitations
 
 - Skill validator: **PASS**. Python helper/privacy tests: **13 passed**. Fullscreen helper tests: **4 passed**. Git metadata privacy guard: **PASS**. Plugin manifest parse and relative Markdown link validation: **PASS**. `git diff --check`: **PASS**.
