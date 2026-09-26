@@ -9,7 +9,7 @@ Prepare a short internal plan before executing. Preserve explicit user steps and
 ## Modes
 
 - **Plan-only:** describe proposed steps and validation without opening the target or changing its state.
-- **Dry-run:** additionally identify target, inputs, files, authentication needs, browser availability, and consequential actions; do not execute the test.
+- **Dry-run:** additionally identify target, inputs, files, authentication needs, browser availability, and consequential actions; do not execute the test. Include a `Browser capability` field with the currently visible compatible tool name, `unavailable`, or `not verified`. Determine availability from the host's current tool/configuration context without navigating to the target.
 - **Execution:** use the browser, collect observations and evidence, and report results.
 - **Exploratory:** create a small, clearly labeled set of agent-generated cases based on visible UI and obvious validation edges. Do not attribute them to formal requirements.
 

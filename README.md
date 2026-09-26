@@ -19,7 +19,7 @@ The [Skill entrypoint](skills/prompt-ui-testing/SKILL.md) stays concise. Its `re
 
 ## Install the Skill
 
-Codex currently discovers project skills in `.agents/skills` and user skills in `~/.agents/skills`. Copy the whole Skill folder, including its references, assets, and script:
+Codex discovers project skills under `.agents/skills` from the working directory up to the repository root. User skills belong under `~/.agents/skills` and are available across projects. Copy the whole Skill folder, including its references, assets, and script:
 
 ```sh
 # From this repository, for one target project:
@@ -31,25 +31,34 @@ mkdir -p ~/.agents/skills
 cp -R skills/prompt-ui-testing ~/.agents/skills/
 ```
 
-The Skill's files must be visible to the agent and the screenshot helper must be runnable in its execution environment. Install the helper dependency there:
+The Skill's files must be visible to the agent and the screenshot helper must be runnable in its execution environment. Install Pillow in that environment:
 
 ```sh
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
 ```
 
-Point the agent at that interpreter when it composes evidence. If you copy only the Skill folder into another project, install `Pillow>=10,<13` in that environment. These paths follow the [current Codex Skill documentation](https://learn.chatgpt.com/docs/build-skills); check it when installing in another host.
+The Skill prefers the target project's `.venv` interpreter when it can import Pillow; use `.venv/Scripts/python.exe` on Windows. When installing into a project or user folder that does not contain this repository's `requirements.txt`, create a project environment and install Pillow directly:
+
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install 'Pillow>=10,<13'
+```
+
+Codex detects newly installed skills automatically; start a new session if the Skill does not appear. See the [current Codex Skill documentation](https://learn.chatgpt.com/docs/build-skills) for supported locations and host behavior.
 
 ## Connect a browser
 
-For Codex CLI, the current [Codex MCP command format](https://learn.chatgpt.com/docs/extend/mcp?surface=cli) and [Playwright MCP package](https://playwright.dev/mcp/installation) give:
+Playwright MCP is a separate dependency; installing this Skill does not install or configure it. It requires Node.js 20 or newer. For Codex CLI, add the server using the current [Codex MCP command format](https://learn.chatgpt.com/docs/extend/mcp) and [Playwright MCP package](https://playwright.dev/mcp/installation):
 
 ```sh
-codex mcp add playwright -- npx @playwright/mcp@latest
+codex mcp add playwright -- npx --yes @playwright/mcp@latest --headless
 codex mcp list
 ```
 
-Playwright MCP requires Node.js 20 or newer and downloads its browser on first use. Restart the host if the new tools do not appear. The browser capability must support navigation, semantic inspection, requested controls, active URL retrieval, and screenshots. If it cannot meet a requested test or the URL-visible evidence rule, the agent must say so without claiming execution or evidence.
+Playwright's install guide says the browser downloads automatically on first use. If a server reports that the selected browser is missing, install that browser with the command in its error (for example, `npx --yes @playwright/mcp@latest install-browser firefox`); this was required for Firefox in validation. The default `chrome` channel used an existing Google Chrome installation on this machine. Start a fresh Codex process after adding the server; an already-running session may retain its previous tool list. In the ChatGPT desktop app, MCP configuration is shared with Codex CLI; add the server under **Settings → MCP servers** and select **Restart**. The host may request approval before browser tool calls. Do not globally approve an MCP server unless you trust it. In non-interactive runs that cannot answer approval prompts, configure the server's `default_tools_approval_mode` for that run; this validation used `approve` only for its disposable Playwright session because its CLI approval policy was `never`. See the [Codex MCP settings](https://learn.chatgpt.com/docs/extend/mcp#configure-with-configtoml) for supported approval values.
+
+The browser capability must support navigation, semantic inspection, requested controls, active URL retrieval, and screenshots. If Playwright MCP is absent, unavailable, or denied, the Skill must report `BLOCKED` (or another accurate execution limitation) without claiming browser execution or evidence. If a requested control or URL-visible evidence cannot be produced, explain the limitation.
 
 For a local app, run its server before testing. A remote or containerized browser may not share your machine's `localhost`; use a browser on the same machine or an explicitly provided reachable endpoint. A browser-to-localhost network limitation is `BLOCKED`, not an application failure.
 
@@ -81,18 +90,20 @@ printf '%s' '{"url":"http://localhost:3000/create-account"}' | \
 
 The URL in that command is only an illustration. During a test, use the URL returned by the active browser page, including redirects or SPA navigation. Do not pass sensitive URLs on a shell command line; feed the JSON through stdin from a safe environment. The helper does not remove secrets already visible inside the application screenshot, so avoid capturing secret entry or confidential page content.
 
+Use a separate evidence workspace for each independent test run, with unique test/checkpoint filenames. Do not reuse earlier screenshots or output folders; concurrent browser runs also need separate browser sessions and output paths. The Skill reports only evidence that the current run actually created.
+
 ## Distribution
 
 The root [plugin.json](plugin.json) makes this repository a portable skills-only plugin package under the [current plugin structure](https://developers.openai.com/plugins/build/plugins). The package deliberately does not bundle a browser server: hosts differ in how they launch browsers and reach local applications. Configure Playwright MCP or another compatible browser capability in the host separately.
 
-For local plugin testing in supported Codex clients, this repository provides a [repo marketplace](.agents/plugins/marketplace.json). Add this checkout as a marketplace source, then install its plugin:
+For local plugin testing in Codex CLI, this repository provides a [repo marketplace](.agents/plugins/marketplace.json). Add the marketplace root, then install its plugin:
 
 ```sh
 codex plugin marketplace add /absolute/path/to/prompt-ui-tester
 codex plugin add prompt-ui-testing@prompt-ui-tester-local
 ```
 
-Restart the host to pick up an installed plugin. A public directory listing is a separate publication step and has not been performed. Project and user Skill installation above work without a plugin host.
+Start a fresh Codex session after installing the plugin. For local marketplace changes in the ChatGPT desktop app, restart the app before selecting the marketplace and installing the plugin. The Plugin packages the Skill; it does not bundle or configure Playwright MCP, so configure that dependency separately as described above. A public directory listing is a separate publication step and has not been performed. Project and user Skill installation above work without a plugin host.
 
 ## Safety and limitations
 
