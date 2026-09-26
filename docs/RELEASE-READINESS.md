@@ -6,7 +6,7 @@
 
 ## Overall Status
 
-**READY FOR v0.1.0.** No concrete release blocker was found. This review does not create a Git tag or publish the Plugin or package.
+**SUPERSEDED — do not use as current release approval.** This review predated discovery of non-anonymous identity metadata in the public `v0.1.0` Git objects. The Skill validation findings below remain historical, but the public release is affected pending the [Git metadata privacy remediation](PRIVACY-REMEDIATION.md) and authorized remote recovery.
 
 ## Validation Summary
 
