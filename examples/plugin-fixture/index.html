@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Prompt UI Testing Demo</title>
+    <style>
+      body { font: 16px/1.5 system-ui, sans-serif; margin: 2rem auto; max-width: 42rem; padding: 0 1rem; color: #17212b; }
+      fieldset { border: 1px solid #9aa8b4; border-radius: .5rem; margin: 1.5rem 0; padding: 1rem; }
+      label { display: block; margin: .8rem 0 .25rem; }
+      input, select, button { font: inherit; padding: .4rem; }
+      [role="status"], [role="alert"] { min-height: 1.5em; }
+    </style>
+  </head>
+  <body>
+    <h1>Prompt UI Testing Demo</h1>
+    <p>This disposable fixture runs locally and does not send form values or files to a server.</p>
+
+    <form id="sample-form" novalidate>
+      <fieldset>
+        <legend>Sample form</legend>
+        <label for="name">Name</label>
+        <input id="name" name="name" autocomplete="off">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="off">
+        <label for="plan">Plan</label>
+        <select id="plan" name="plan">
+          <option value="">Choose a plan</option>
+          <option value="basic">Basic</option>
+          <option value="plus">Plus</option>
+        </select>
+        <button type="submit">Submit sample form</button>
+        <p id="form-result" role="status" aria-live="polite"></p>
+        <p id="form-error" role="alert" aria-live="assertive"></p>
+      </fieldset>
+    </form>
+
+    <form id="sample-file-form">
+      <fieldset>
+        <legend>Local file selection demo</legend>
+        <label for="sample-file">Text file</label>
+        <input id="sample-file" name="file" type="file" accept="text/plain">
+        <button type="submit">Confirm selected file</button>
+        <p id="file-result" role="status" aria-live="polite"></p>
+      </fieldset>
+    </form>
+
+    <script>
+      document.querySelector('#sample-form').addEventListener('submit', (event) => {
+        event.preventDefault();
+        const name = document.querySelector('#name').value.trim();
+        const email = document.querySelector('#email').value.trim();
+        const plan = document.querySelector('#plan').value;
+        const error = document.querySelector('#form-error');
+        document.querySelector('#form-result').textContent = '';
+        if (!name || !email || !plan || !document.querySelector('#email').validity.valid) {
+          error.textContent = 'Enter a name, a valid email, and choose a plan.';
+          return;
+        }
+        error.textContent = '';
+        document.querySelector('#form-result').textContent = `Form accepted for ${name}.`;
+      });
+
+      document.querySelector('#sample-file-form').addEventListener('submit', (event) => {
+        event.preventDefault();
+        const file = document.querySelector('#sample-file').files[0];
+        document.querySelector('#file-result').textContent = file
+          ? `Selected file: ${file.name}`
+          : 'Choose a text file first.';
+      });
+    </script>
+  </body>
+</html>
