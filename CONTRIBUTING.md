@@ -108,7 +108,7 @@ Run the release metadata check and inspect file contents and secrets separately:
 python3 scripts/check_git_metadata_privacy.py
 ```
 
-The metadata check scans reachable commit author and committer fields plus annotated tagger fields. It allows GitHub `users.noreply.github.com` identities and redacts unapproved addresses in its output. Before tagging, also run the repository privacy scan, secret scan, Skill validator, helper tests, manifest checks, link checks, and `git diff --check`.
+The metadata check scans reachable commit author and committer fields plus annotated tagger fields. It allows GitHub `users.noreply.github.com` identities and GitHub's exact web-merge identity `noreply@github.com`, and redacts unapproved addresses in its output. Before tagging, also run the repository privacy scan, secret scan, Skill validator, helper tests, manifest checks, link checks, and `git diff --check`.
 
 ### Branch protection recommendations
 
