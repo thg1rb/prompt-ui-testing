@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.1.1 — 2026-09-26
+
+This privacy and release correction supersedes the withdrawn `v0.1.0`; it contains the same initial Skill functionality.
+
+### Security / Privacy
+
+- Re-published the initial release from sanitized Git metadata.
+- Added permanent Git metadata privacy validation to the release checks.
+
 ## v0.1.0 — 2026-09-26
 
 - Prompt-driven black-box UI testing for remote sites and localhost applications, using Playwright MCP as a separately configured browser capability.

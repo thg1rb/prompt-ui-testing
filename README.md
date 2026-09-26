@@ -2,6 +2,8 @@
 
 `prompt-ui-testing` is a reusable Agent Skill for prompt-driven, black-box testing of web applications. Give the agent a URL, actions, and an expected UI result. The Skill guides browser interaction, evidence capture, and an honest `PASS`, `FAIL`, `BLOCKED`, or `INCONCLUSIVE` report. It supports remote sites and applications running at `localhost` or `127.0.0.1`.
 
+**Current release:** `v0.1.1` supersedes withdrawn `v0.1.0`, which did not meet the repository's Git metadata privacy requirements. See the [release notes](CHANGELOG.md) and [remediation record](docs/PRIVACY-REMEDIATION.md).
+
 The target application needs no code changes, test files, selectors, or automation scripts. The Skill supplies policy and workflow; a separate browser capability performs the actions. [Playwright MCP](https://playwright.dev/mcp/installation) is preferred.
 
 ## How it works
