@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.1.2 release candidate — 2026-09-26 (not yet published)
+## v0.1.2 — 2026-09-26
 
 Browser-execution and test-isolation improvements for the existing Skill.
 
