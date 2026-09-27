@@ -1,25 +1,153 @@
-# Prompt UI Testing
+<p align="center">
+  <img src="./assets/logo.png" alt="Prompt UI Testing" width="180" />
+</p>
 
-`prompt-ui-testing` is a reusable Agent Skill for prompt-driven, black-box testing of web applications. Give the agent a URL, actions, and an expected UI result. The Skill guides browser interaction, evidence capture, and an honest `PASS`, `FAIL`, `BLOCKED`, or `INCONCLUSIVE` report. It supports remote sites and applications running at `localhost` or `127.0.0.1`.
+<h1 align="center">Prompt UI Testing</h1>
+
+<p align="center"><strong>From Prompt to Proof.</strong></p>
+
+<p align="center">
+  Prompt-driven black-box UI testing for AI Agents with browser automation,<br />
+  Expected vs Actual validation, and screenshot evidence.
+</p>
 
 **Current release:** [`v0.1.3`](https://github.com/thg1rb/prompt-ui-testing/releases/tag/v0.1.3). See the [changelog](CHANGELOG.md), [v0.1.2 release record](docs/releases/v0.1.2.md), and [v0.1.3 release record](docs/releases/v0.1.3.md). The earlier `v0.1.0` release was withdrawn and superseded by `v0.1.1` after Git metadata privacy remediation; see the [remediation record](docs/PRIVACY-REMEDIATION.md).
 
-The target application needs no code changes, test files, selectors, or automation scripts. The Skill supplies policy and workflow; a separate browser capability performs the actions. [Playwright MCP](https://playwright.dev/mcp/installation) is preferred.
+## Tired of Testing the Old Way?
 
-For the Plugin listing, see [privacy details](PRIVACY.md), [security guidance](SECURITY.md), and the [submission preparation record](docs/PLUGIN-SUBMISSION.md). The public package is skills-only; browser automation is provided separately by the host.
+Build a feature. Open the browser. Click through every step. Take screenshots one by one. Save the evidence. Write the test. Change the feature. And… do it all over again.
 
-## How it works
+What if you could simply describe what you want to test and what you expect to happen? Prompt UI Testing lets you describe the goal in natural language while an Agent handles browser interaction, compares the observed UI with your expectations, and collects evidence. It helps with the repetitive workflow; it does not replace QA judgment or make every test automatic.
+
+## Prompt-Driven UI Testing
+
+**The test specification is the prompt.** Describe the target application, goal, test data, any necessary actions, expected result, and evidence checkpoints. The Agent turns that intent into a black-box UI test without requiring changes to the application under test.
+
+## From Prompt to Proof
 
 ```text
-Natural-language request
-  → test plan and safety review
-  → semantic browser interaction
-  → expected-versus-actual UI validation
-  → raw screenshot + active URL → URL-visible evidence PNG
-  → per-test result report
+Intent / Requirement
+        ↓
+Natural-language Test Specification
+        ↓
+AI Agent + prompt-ui-testing
+        ↓
+Google Chrome via Playwright MCP
+        ↓
+UI Interaction
+        ↓
+Expected vs Actual
+        ↓
+Screenshot + URL Evidence
+        ↓
+PASS / FAIL / BLOCKED / INCONCLUSIVE
 ```
 
-The [Skill entrypoint](skills/prompt-ui-testing/SKILL.md) stays concise. Its `references/` directory contains the detailed policies. The [evidence helper](skills/prompt-ui-testing/scripts/compose_evidence.py) adds a redacted active-page URL above the screenshot and retains the raw file. Its only Python dependency is Pillow; install it from [requirements.txt](requirements.txt) in the agent's execution environment. The browser remains responsible for reporting the actual URL at capture time.
+The application remains a black box: the Agent observes and interacts through the browser, checks the expected result against what actually appeared, then reports the result with URL-visible screenshot evidence. Remote sites and apps at `localhost` or `127.0.0.1` are supported. Common workflows include forms, file-input uploads, redirects, and single-page app navigation.
+
+The [Skill entrypoint](skills/prompt-ui-testing/SKILL.md) stays concise; detailed policy lives in its `references/` directory. The [evidence helper](skills/prompt-ui-testing/scripts/compose_evidence.py) adds a redacted, browser-observed URL above the screenshot and retains the raw image. Its only Python dependency is Pillow; install it from [requirements.txt](requirements.txt) in the Agent's execution environment.
+
+For information about the skills-only Plugin package, see [privacy details](PRIVACY.md), [security guidance](SECURITY.md), and the [submission preparation record](docs/PLUGIN-SUBMISSION.md). Browser automation is provided separately by the host.
+
+## Quick Start
+
+1. [Install the Skill](#install-the-skill) in your project or user Skill folder.
+2. [Configure Playwright MCP](#connect-a-browser) and the documented Google Chrome setup.
+3. Ask the Agent to test a flow and state what should happen. For example, use the [short prompt below](#short-example).
+
+The default setup prefers headed, isolated Google Chrome with Fullscreen and a maximized fallback. Playwright MCP performs normal browser automation; Computer Use is not required. Fullscreen behavior is runtime-validated on macOS only.
+
+## Copy-Paste Prompt Template
+
+You normally do not need to provide CSS selectors, XPath, or Playwright locator syntax. The Agent works from the observable UI and chooses appropriate interactions. If a control is ambiguous or unavailable, it may ask for clarification or report the limitation.
+
+Copy this template and fill in the parts relevant to your test; you can omit sections you do not need:
+
+```markdown
+Use $prompt-ui-testing to test:
+
+<TARGET_URL>
+
+## Goal
+
+<Describe what you want to verify>
+
+## Preconditions
+
+- <Optional prerequisite>
+- <Authentication requirement, if needed>
+
+## Test Data
+
+- <Field> = <Value>
+- <Field> = <Value>
+
+## Steps
+
+1. <Action>
+2. <Action>
+3. <Action>
+
+## Expected Result
+
+- <Expected behavior>
+- <Expected visible result>
+- <Expected navigation or state>
+
+## Files
+
+- <Optional file path>
+
+## Evidence
+
+Capture screenshots at:
+
+1. <Checkpoint>
+2. <Checkpoint>
+3. <Final result>
+
+## Report
+
+Compare Expected vs Actual.
+
+Return one of:
+
+- PASS
+- FAIL
+- BLOCKED
+- INCONCLUSIVE
+
+Include the observed result and relevant screenshot evidence.
+```
+
+### Short Example
+
+You do not need to fill every template section for a simple test:
+
+```text
+Use $prompt-ui-testing to test:
+
+http://localhost:3000/example
+
+Goal:
+Verify that a user can submit the form successfully.
+
+Input:
+Name = Sample User
+Email = sample@example.com
+
+Expected:
+- The form submits successfully.
+- A confirmation message appears.
+
+Evidence:
+- Before submission
+- Final result
+
+Report:
+Compare Expected vs Actual and return
+PASS, FAIL, BLOCKED, or INCONCLUSIVE.
+```
 
 ## Install the Skill
 
@@ -172,4 +300,15 @@ Start a fresh Codex session after installing the plugin. For local marketplace c
 
 The unverified variants are tracked in the [requirement traceability matrix](docs/REQUIREMENT-TRACEABILITY.md); they are limitations, not claims of runtime support.
 
-See [SECURITY.md](SECURITY.md) for handling sensitive targets and [CONTRIBUTING.md](CONTRIBUTING.md) for the task-branch → PR → review → develop workflow, validation guidance, and public-safe examples.
+## Documentation and Contributing
+
+- [Validation record](docs/VALIDATION.md)
+- [Requirement traceability matrix](docs/REQUIREMENT-TRACEABILITY.md)
+- [Security guidance](SECURITY.md)
+- [Contribution workflow](CONTRIBUTING.md)
+
+Contributions follow the documented task-branch → PR → review → `develop` workflow. Use public-safe examples and never add private targets, credentials, or screenshots.
+
+## License
+
+This project is available under the [MIT License](LICENSE).
